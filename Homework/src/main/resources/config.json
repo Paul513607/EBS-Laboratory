@@ -1,5 +1,5 @@
 {
-  "companyPossibleValues": ["Company1", "Company2", "Company3"],
+  "companyPossibleValues": ["C1", "C2", "C3"],
   "valueMin": 0.0,
   "valueMax": 100.0,
   "dropMin": 0.0,
@@ -20,7 +20,7 @@
   "variationOperatorFrequency": 0.5,
   "dateOperatorFrequency": 0.5,
 
-  "numberOfThreads": 10,
-  "numberOfPublications": 10000,
-  "numberOfSubscriptions": 10000
+  "numberOfThreads": 1,
+  "numberOfPublications": 100,
+  "numberOfSubscriptions": 100
 }

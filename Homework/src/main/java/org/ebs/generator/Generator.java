@@ -2,6 +2,7 @@ package org.ebs.generator;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.ebs.constant.FieldFrequencyMap;
 import org.ebs.data.Publication;
 import org.ebs.data.Subscription;
 import org.ebs.file.FileManager;
@@ -35,6 +36,8 @@ public class Generator {
     }
 
     public void generate() {
+        FieldFrequencyMap.fillFieldTotalCountMap(numberOfSubscriptions);
+
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         List<Future<List<Publication>>> futurePublications = new ArrayList<>();
         List<Future<List<Subscription>>> futureSubscriptions = new ArrayList<>();

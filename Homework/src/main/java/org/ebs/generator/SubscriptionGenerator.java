@@ -40,26 +40,31 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
                 switch (fieldName) {
                     case "company":
                         if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getFieldFrequency(fieldName)) {
+                            SubscriptionFieldCounter.incrementCompanyCounter();
                             fields.add(new StringField(fieldName, FieldParams.companyPossibleValues));
                         }
                         break;
                     case "value":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getFieldFrequency(fieldName)) {
+                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
+                            SubscriptionFieldCounter.incrementValueCounter();
                             fields.add(new DoubleField(fieldName, FieldParams.valueMin, FieldParams.valueMax));
                         }
                         break;
                     case "drop":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getFieldFrequency(fieldName)) {
+                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
+                            SubscriptionFieldCounter.incrementDropCounter();
                             fields.add(new DoubleField(fieldName, FieldParams.dropMin, FieldParams.dropMax));
                         }
                         break;
                     case "variation":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getFieldFrequency(fieldName)) {
+                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
+                            SubscriptionFieldCounter.incrementVariationCounter();
                             fields.add(new DoubleField(fieldName, FieldParams.variationMin, FieldParams.variationMax));
                         }
                         break;
                     case "date":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getFieldFrequency(fieldName)) {
+                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
+                            SubscriptionFieldCounter.incrementDateCounter();
                             fields.add(new DateField(fieldName, FieldParams.datePossibleValues));
                         }
                         break;
@@ -73,7 +78,6 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
             if (subscription.getFields().size() > 0) {
                 subscriptions.add(subscription);
             } else {
-                i--;
             }
         }
 
