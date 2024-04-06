@@ -20,7 +20,7 @@
   "variationOperatorFrequency": 0.5,
   "dateOperatorFrequency": 0.5,
 
-  "numberOfThreads": 1,
+  "numberOfThreads": 4,
   "numberOfPublications": 100,
   "numberOfSubscriptions": 100
 }

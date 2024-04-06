@@ -31,21 +31,34 @@ public class FieldFrequencyMap {
         return fieldFrequencyMap.get(fieldName);
     }
 
-    public synchronized static double getAdjustedFieldFrequency(String fieldName) {
+    public synchronized static double getAdjustedFieldFrequency(String fieldName, int numberOfSubscriptions) {
         int targetCount = fieldTotalCountMap.get(fieldName);
         int generatedCount = SubscriptionFieldCounter.getCounterOfField(fieldName);
 
+        int remainingCount = targetCount - generatedCount;
+
+        if (remainingCount <= 0) {
+            return 0.0;  // No more subscriptions needed for this field
+        }
         double baseFrequency = fieldFrequencyMap.get(fieldName);
+        double adjustedFrequency = baseFrequency * ((double) remainingCount / numberOfSubscriptions);
 
-        double adjustedFrequency = baseFrequency * (1.0 - (double) generatedCount / targetCount);
-
-        adjustedFrequency = Math.max(adjustedFrequency, 0);
+        // Ensure adjusted frequency is within bounds
+        adjustedFrequency = Math.min(1.0, adjustedFrequency);
+        adjustedFrequency = Math.max(0.0, adjustedFrequency);
 
         return adjustedFrequency;
     }
 
     public static boolean fieldFrequencyMapContainsKey(String fieldName) {
         return fieldFrequencyMap.containsKey(fieldName);
+    }
+
+    public static synchronized boolean isAtSubscriptionLimit(String fieldName, int numberOfSubscriptions) {
+        int targetCount = fieldTotalCountMap.get(fieldName);
+        int generatedCount = SubscriptionFieldCounter.getCounterOfField(fieldName);
+
+        return numberOfSubscriptions - SubscriptionFieldCounter.getTotalSubscriptionCounter() == targetCount - generatedCount;
     }
 
     public static void normalizeFieldFrequencies() {

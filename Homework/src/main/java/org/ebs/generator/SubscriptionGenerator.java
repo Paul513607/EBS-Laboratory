@@ -23,6 +23,8 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
 
     private FileManager fileManager;
 
+    private final int MAX_ATTEMPTS = 3;
+
     public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads, FileManager fileManager) {
         this.numberOfSubscriptions = numberOfSubscriptions;
         this.numberOfThreads = numberOfThreads;
@@ -34,50 +36,59 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
 
     @Override
     public List<Subscription> call() {
-        for (int i = 0; i < numberOfSubscriptions / numberOfThreads; i++) {
+        for (int i = 0; i < numberOfSubscriptions / numberOfThreads;) {
             List<Field<?>> fields = new ArrayList<>();
-            for (String fieldName : FieldFrequencyMap.fieldFrequencyMap.keySet()) {
-                switch (fieldName) {
-                    case "company":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getFieldFrequency(fieldName)) {
-                            SubscriptionFieldCounter.incrementCompanyCounter();
-                            fields.add(new StringField(fieldName, FieldParams.companyPossibleValues));
-                        }
-                        break;
-                    case "value":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
-                            SubscriptionFieldCounter.incrementValueCounter();
-                            fields.add(new DoubleField(fieldName, FieldParams.valueMin, FieldParams.valueMax));
-                        }
-                        break;
-                    case "drop":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
-                            SubscriptionFieldCounter.incrementDropCounter();
-                            fields.add(new DoubleField(fieldName, FieldParams.dropMin, FieldParams.dropMax));
-                        }
-                        break;
-                    case "variation":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
-                            SubscriptionFieldCounter.incrementVariationCounter();
-                            fields.add(new DoubleField(fieldName, FieldParams.variationMin, FieldParams.variationMax));
-                        }
-                        break;
-                    case "date":
-                        if (ThreadLocalRandom.current().nextDouble() < FieldFrequencyMap.getAdjustedFieldFrequency(fieldName)) {
-                            SubscriptionFieldCounter.incrementDateCounter();
-                            fields.add(new DateField(fieldName, FieldParams.datePossibleValues));
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+            int attempts = 0;
+            boolean validSubscription = false;
+            while (!validSubscription && attempts < MAX_ATTEMPTS) {
+                for (String fieldName : FieldFrequencyMap.fieldFrequencyMap.keySet()) {
+                    int targetCount = FieldFrequencyMap.fieldTotalCountMap.get(fieldName);
+                    double frequency = FieldFrequencyMap.getFieldFrequency(fieldName);
 
-            Subscription subscription = new Subscription(fields);
-            subscription.generate();
-            if (subscription.getFields().size() > 0) {
-                subscriptions.add(subscription);
-            } else {
+                    if (SubscriptionFieldCounter.getCounterOfField(fieldName) < targetCount &&
+                            ThreadLocalRandom.current().nextDouble() < frequency || FieldFrequencyMap.isAtSubscriptionLimit(fieldName, numberOfSubscriptions)) {
+                        switch (fieldName) {
+                            case "company":
+                                SubscriptionFieldCounter.incrementCompanyCounter();
+                                fields.add(new StringField(fieldName, FieldParams.companyPossibleValues));
+                                break;
+                            case "value":
+                                SubscriptionFieldCounter.incrementValueCounter();
+                                fields.add(new DoubleField(fieldName, FieldParams.valueMin, FieldParams.valueMax));
+                                break;
+                            case "drop":
+                                SubscriptionFieldCounter.incrementDropCounter();
+                                fields.add(new DoubleField(fieldName, FieldParams.dropMin, FieldParams.dropMax));
+                                break;
+                            case "variation":
+                                SubscriptionFieldCounter.incrementVariationCounter();
+                                fields.add(new DoubleField(fieldName, FieldParams.variationMin, FieldParams.variationMax));
+                                break;
+                            case "date":
+                                SubscriptionFieldCounter.incrementDateCounter();
+                                fields.add(new DateField(fieldName, FieldParams.datePossibleValues));
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+                Subscription subscription = new Subscription(fields);
+                subscription.generate();
+                validSubscription = subscription.getFields().size() > 0;
+                if (validSubscription) {
+                    subscriptions.add(subscription);
+                    SubscriptionFieldCounter.incrementTotalSubscriptionCounter();
+                    i++;
+                    break;
+                } else {
+                    attempts++;
+                }
+
+                if (attempts == 3) {
+                    i++;
+                }
             }
         }
 
