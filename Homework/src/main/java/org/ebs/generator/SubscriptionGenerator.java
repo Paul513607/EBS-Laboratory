@@ -6,8 +6,10 @@ import org.ebs.field.DateField;
 import org.ebs.field.DoubleField;
 import org.ebs.field.Field;
 import org.ebs.field.StringField;
+import org.ebs.file.FileManager;
 import org.ebs.util.FieldParams;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -19,9 +21,13 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
 
     private List<Subscription> subscriptions;
 
-    public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads) {
+    private FileManager fileManager;
+
+    public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads, FileManager fileManager) {
         this.numberOfSubscriptions = numberOfSubscriptions;
         this.numberOfThreads = numberOfThreads;
+
+        this.fileManager = fileManager;
 
         this.subscriptions = new ArrayList<>();
     }
@@ -64,7 +70,17 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
 
             Subscription subscription = new Subscription(fields);
             subscription.generate();
-            subscriptions.add(subscription);
+            if (subscription.getFields().size() > 0) {
+                try {
+                    fileManager.writeSubscriptionToFile(subscription);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                subscriptions.add(subscription);
+            } else {
+                i--;
+            }
         }
 
         return subscriptions;

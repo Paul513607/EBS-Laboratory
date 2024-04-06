@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.ebs.data.Publication;
 import org.ebs.data.Subscription;
+import org.ebs.file.FileManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,13 @@ public class Generator {
     private List<Publication> allPublications = new ArrayList<>();
     private List<Subscription> allSubscriptions = new ArrayList<>();
 
-    public Generator(int numberOfThreads, int numberOfPublications, int numberOfSubscriptions) {
+    private FileManager fileManager;
+
+    public Generator(int numberOfThreads, int numberOfPublications, int numberOfSubscriptions, FileManager fileManager) {
         this.numberOfThreads = numberOfThreads;
         this.numberOfPublications = numberOfPublications;
         this.numberOfSubscriptions = numberOfSubscriptions;
+        this.fileManager = fileManager;
     }
 
     public void generate() {
@@ -36,14 +40,14 @@ public class Generator {
 
         // Submit PublicationGenerator tasks
         for (int i = 0; i < numberOfThreads; i++) {
-            PublicationGenerator publicationGenerator = new PublicationGenerator(numberOfPublications, numberOfThreads);
+            PublicationGenerator publicationGenerator = new PublicationGenerator(numberOfPublications, numberOfThreads, fileManager);
             Future<List<Publication>> futurePublication = executor.submit(publicationGenerator);
             futurePublications.add(futurePublication);
         }
 
         // Submit SubscriptionGenerator tasks
         for (int i = 0; i < numberOfThreads; i++) {
-            SubscriptionGenerator subscriptionGenerator = new SubscriptionGenerator(numberOfSubscriptions, numberOfThreads);
+            SubscriptionGenerator subscriptionGenerator = new SubscriptionGenerator(numberOfSubscriptions, numberOfThreads, fileManager);
             Future<List<Subscription>> futureSubscription = executor.submit(subscriptionGenerator);
             futureSubscriptions.add(futureSubscription);
         }

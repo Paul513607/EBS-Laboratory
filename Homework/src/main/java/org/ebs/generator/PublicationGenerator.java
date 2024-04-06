@@ -5,8 +5,10 @@ import org.ebs.data.Publication;
 import org.ebs.field.DateField;
 import org.ebs.field.DoubleField;
 import org.ebs.field.StringField;
+import org.ebs.file.FileManager;
 import org.ebs.util.FieldParams;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,9 +20,13 @@ public class PublicationGenerator implements Callable<List<Publication>> {
 
     private List<Publication> publications;
 
-    public PublicationGenerator(int numberOfPublications, int numberOfThreads) {
+    private FileManager fileManager;
+
+    public PublicationGenerator(int numberOfPublications, int numberOfThreads, FileManager fileManager) {
         this.numberOfPublications = numberOfPublications;
         this.numberOfThreads = numberOfThreads;
+
+        this.fileManager = fileManager;
 
         this.publications = new ArrayList<>();
     }
@@ -36,6 +42,12 @@ public class PublicationGenerator implements Callable<List<Publication>> {
 
             Publication publication = new Publication(companyField, valueField, dropField, variationField, dateField);
             publication.generate();
+
+            try {
+                fileManager.writePublicationToFile(publication);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             publications.add(publication);
         }
         return publications;

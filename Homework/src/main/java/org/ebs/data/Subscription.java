@@ -2,12 +2,12 @@ package org.ebs.data;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.ebs.constant.EqOperatorFrequencyMap;
 import org.ebs.field.Field;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import static org.ebs.constant.EqOperatorFrequencyMap.*;
 
 @Getter
 @Setter
@@ -26,7 +26,7 @@ public class Subscription {
         for (Field<?> field : fields) {
             field.setRandomValue();
             String operator;
-            if (eqMapContainsKey(field.getName())) {
+            if (EqOperatorFrequencyMap.eqMapContainsKey(field.getName())) {
                 operator = getRandomOperator(field.getName());
             } else {
                 operator = getRandomOperator(null);
@@ -42,7 +42,7 @@ public class Subscription {
         }
 
         double randomNumber = ThreadLocalRandom.current().nextDouble(0, 1);
-        if (randomNumber < getEqFrequency(fieldName)) {
+        if (randomNumber < EqOperatorFrequencyMap.getEqFrequency(fieldName)) {
             return "=";
         } else {
             List<String> operatorsButEqual = operators.subList(1, operators.size());

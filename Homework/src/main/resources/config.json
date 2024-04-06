@@ -1,0 +1,26 @@
+{
+  "companyPossibleValues": ["Company1", "Company2", "Company3"],
+  "valueMin": 0.0,
+  "valueMax": 100.0,
+  "dropMin": 0.0,
+  "dropMax": 50.0,
+  "variationMin": 0.0,
+  "variationMax": 1.0,
+  "datePossibleValues": ["2024-04-06", "2024-04-07", "2024-04-08"],
+
+  "companyFrequency": 0.7,
+  "valueFrequency": 0.5,
+  "dropFrequency": 0.3,
+  "variationFrequency": 0.2,
+  "dateFrequency": 0.5,
+
+  "companyOperatorFrequency": 0.5,
+  "valueOperatorFrequency": 0.5,
+  "dropOperatorFrequency": 0.5,
+  "variationOperatorFrequency": 0.5,
+  "dateOperatorFrequency": 0.5,
+
+  "numberOfThreads": 2,
+  "numberOfPublications": 10,
+  "numberOfSubscriptions": 10
+}
