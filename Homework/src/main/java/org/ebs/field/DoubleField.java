@@ -21,6 +21,8 @@ public class DoubleField extends Field<Double> {
     @Override
     public void setRandomValue() {
         this.value = ThreadLocalRandom.current().nextDouble(minValue, maxValue);
+        // Truncate
+        this.value = Math.floor(value * 100) / 100;
     }
 
     @Override

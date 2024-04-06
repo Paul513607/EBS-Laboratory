@@ -53,6 +53,10 @@ public class Subscription {
 
     @Override
     public String toString() {
+        if (fields.size() == 0) {
+            return "{}";
+        }
+
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         for (int i = 0; i < fields.size() - 1; i++) {
