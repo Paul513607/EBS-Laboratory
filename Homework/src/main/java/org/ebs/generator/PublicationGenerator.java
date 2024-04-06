@@ -43,11 +43,6 @@ public class PublicationGenerator implements Callable<List<Publication>> {
             Publication publication = new Publication(companyField, valueField, dropField, variationField, dateField);
             publication.generate();
 
-            try {
-                fileManager.writePublicationToFile(publication);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
             publications.add(publication);
         }
         return publications;

@@ -71,12 +71,6 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
             Subscription subscription = new Subscription(fields);
             subscription.generate();
             if (subscription.getFields().size() > 0) {
-                try {
-                    fileManager.writeSubscriptionToFile(subscription);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
                 subscriptions.add(subscription);
             } else {
                 i--;

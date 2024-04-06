@@ -13,6 +13,7 @@ import org.ebs.field.StringField;
 import org.ebs.file.FileManager;
 import org.ebs.generator.Generator;
 import org.ebs.util.FieldParams;
+import org.ebs.util.Timer;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
+    public static boolean DEBUG = false;
     public static int numberOfThreads;
     public static int numberOfPublications;
     public static int numberOfSubscriptions;
@@ -48,18 +50,33 @@ public class Main {
         initializeParameters(jsonFilePath);
 
         Generator generator = new Generator(numberOfThreads, numberOfPublications, numberOfSubscriptions, fileManager);
+        Timer timer = Timer.getInstance();
+        timer.start();
         generator.generate();
+        timer.stop();
+        timer.showTimeTaken();
 
-        List<Publication> publications = generator.getAllPublications();
-        System.out.println("Generated Publications:");
-        for (Publication publication : publications) {
-            System.out.println(publication);
+        generator.writePublicationsToFile();
+        generator.writeSubscriptionsToFile();
+
+        try {
+            fileManager.closeFileWriters();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        List<Subscription> subscriptions = generator.getAllSubscriptions();
-        System.out.println("\nGenerated Subscriptions:");
-        for (Subscription subscription : subscriptions) {
-            System.out.println(subscription);
+        if (DEBUG) {
+            List<Publication> publications = generator.getAllPublications();
+            System.out.println("Generated Publications:");
+            for (Publication publication : publications) {
+                System.out.println(publication);
+            }
+
+            List<Subscription> subscriptions = generator.getAllSubscriptions();
+            System.out.println("\nGenerated Subscriptions:");
+            for (Subscription subscription : subscriptions) {
+                System.out.println(subscription);
+            }
         }
     }
 

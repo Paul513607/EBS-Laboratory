@@ -6,6 +6,7 @@ import org.ebs.data.Publication;
 import org.ebs.data.Subscription;
 import org.ebs.file.FileManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -73,6 +74,22 @@ public class Generator {
         }
 
         executor.shutdown();
+    }
+
+    public void writePublicationsToFile() {
+        try {
+            fileManager.writePublicationToFile(allPublications);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void writeSubscriptionsToFile() {
+        try {
+            fileManager.writeSubscriptionToFile(allSubscriptions);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private synchronized void addPublications(List<Publication> publicationsToAdd) {

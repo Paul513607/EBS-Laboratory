@@ -59,7 +59,7 @@ public class FileManager {
         subscriptionFileWriter.flush();
     }
 
-    public synchronized void writePublicationListToFile(List<Publication> publicationList) throws IOException {
+    public synchronized void writePublicationToFile(List<Publication> publicationList) throws IOException {
         publicationList.forEach(publication -> {
             try {
                 publicationFileWriter.write(publication.toString() + "\n");
@@ -70,7 +70,7 @@ public class FileManager {
         });
     }
 
-    public synchronized void writeSubscriptionListToFile(List<Subscription> subscriptionList) throws IOException {
+    public synchronized void writeSubscriptionToFile(List<Subscription> subscriptionList) throws IOException {
         subscriptionList.forEach(subscription -> {
             try {
                 subscriptionFileWriter.write(subscription.toString() + "\n");
