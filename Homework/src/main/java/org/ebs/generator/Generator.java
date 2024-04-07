@@ -44,14 +44,14 @@ public class Generator {
 
         // Submit PublicationGenerator tasks
         for (int i = 0; i < numberOfThreads; i++) {
-            PublicationGenerator publicationGenerator = new PublicationGenerator(numberOfPublications, numberOfThreads, fileManager);
+            PublicationGenerator publicationGenerator = new PublicationGenerator(numberOfPublications, numberOfThreads, i + 1, fileManager);
             Future<List<Publication>> futurePublication = executor.submit(publicationGenerator);
             futurePublications.add(futurePublication);
         }
 
         // Submit SubscriptionGenerator tasks
         for (int i = 0; i < numberOfThreads; i++) {
-            SubscriptionGenerator subscriptionGenerator = new SubscriptionGenerator(numberOfSubscriptions, numberOfThreads, fileManager);
+            SubscriptionGenerator subscriptionGenerator = new SubscriptionGenerator(numberOfSubscriptions, numberOfThreads, i + 1, fileManager);
             Future<List<Subscription>> futureSubscription = executor.submit(subscriptionGenerator);
             futureSubscriptions.add(futureSubscription);
         }

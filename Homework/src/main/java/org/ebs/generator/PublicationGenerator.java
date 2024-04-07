@@ -18,22 +18,31 @@ public class PublicationGenerator implements Callable<List<Publication>> {
     private int numberOfPublications;
     private int numberOfThreads;
 
+    private int threadNum;
+
     private List<Publication> publications;
 
     private FileManager fileManager;
 
-    public PublicationGenerator(int numberOfPublications, int numberOfThreads, FileManager fileManager) {
+    public PublicationGenerator(int numberOfPublications, int numberOfThreads, int threadNum, FileManager fileManager) {
         this.numberOfPublications = numberOfPublications;
         this.numberOfThreads = numberOfThreads;
 
         this.fileManager = fileManager;
+
+        this.threadNum = threadNum;
 
         this.publications = new ArrayList<>();
     }
 
     @Override
     public List<Publication> call() {
-        for (int i = 0; i < numberOfPublications / numberOfThreads; i++) {
+        int publicationsToGenerate = numberOfPublications / numberOfThreads;
+        if (threadNum == numberOfThreads) {
+            publicationsToGenerate = publicationsToGenerate + (numberOfPublications - numberOfThreads * publicationsToGenerate);
+        }
+
+        for (int i = 0; i < publicationsToGenerate; i++) {
             StringField companyField = new StringField("company", FieldParams.companyPossibleValues);
             DoubleField valueField = new DoubleField("value", FieldParams.valueMin, FieldParams.valueMax);
             DoubleField dropField = new DoubleField("drop", FieldParams.dropMin, FieldParams.dropMax);
