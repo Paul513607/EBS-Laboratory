@@ -53,7 +53,7 @@ public class Subscription {
 
     @Override
     public String toString() {
-        if (fields.size() == 0) {
+        if (fields.isEmpty()) {
             return "{}";
         }
 

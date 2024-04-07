@@ -2,17 +2,9 @@ package org.ebs.generator;
 
 import lombok.Getter;
 import lombok.Synchronized;
-import org.ebs.constant.FieldFrequencyMap;
-import org.ebs.field.DateField;
-import org.ebs.field.DoubleField;
-import org.ebs.field.StringField;
-import org.ebs.util.FieldParams;
 
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-
-@Getter(onMethod_ = {@Synchronized})
 public class SubscriptionFieldCounter {
+    private static int totalSubscriptionCounter = 0;
     private static int companyCounter = 0;
     private static int valueCounter = 0;
     private static int dropCounter = 0;
@@ -36,6 +28,10 @@ public class SubscriptionFieldCounter {
         }
     }
 
+    public static synchronized int getTotalSubscriptionCounter() {
+        return totalSubscriptionCounter;
+    }
+
     public static synchronized void incrementCompanyCounter() {
         companyCounter++;
     }
@@ -54,5 +50,9 @@ public class SubscriptionFieldCounter {
 
     public static synchronized void incrementDateCounter() {
         dateCounter++;
+    }
+
+    public static synchronized void incrementTotalSubscriptionCounter() {
+        totalSubscriptionCounter++;
     }
 }
