@@ -30,8 +30,6 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
     private FileManager fileManager;
     private FieldCounter fieldCounter;
 
-    private final int MAX_ATTEMPTS = 3;
-
     public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads, int threadNum, FileManager fileManager) {
         this.numberOfSubscriptions = numberOfSubscriptions;
         this.numberOfThreads = numberOfThreads;
@@ -52,48 +50,43 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
 
         for (int i = 0; i < subscriptionsToGenerate; i++) {
             List<Field<?>> fields = new ArrayList<>();
-            int attempts = 0;
-            boolean validSubscription = false;
-            while (!validSubscription && attempts < MAX_ATTEMPTS) {
-                for (String fieldName : FieldFrequencyMap.fieldFrequencyMap.keySet()) {
-                    int targetCount = fieldCounter.getFieldTotalCountMapThread().get(fieldName);
-                    double frequency = FieldFrequencyMap.getFieldFrequency(fieldName);
+            for (String fieldName : FieldFrequencyMap.fieldFrequencyMap.keySet()) {
+                int targetCount = fieldCounter.getFieldTotalCountMapThread().get(fieldName);
+                double frequency = FieldFrequencyMap.getFieldFrequency(fieldName);
 
-                    if (fieldCounter.isAtSubscriptionLimit(fieldName, subscriptionsToGenerate, threadNum) || fieldCounter.getCounterOfField(fieldName) < targetCount &&
-                            ThreadLocalRandom.current().nextDouble() < frequency) {
-                        switch (fieldName) {
-                            case "company":
-                                fieldCounter.incrementCompanyCounter();
-                                fields.add(new StringField(fieldName, FieldParams.companyPossibleValues));
-                                break;
-                            case "value":
-                                fieldCounter.incrementValueCounter();
-                                fields.add(new DoubleField(fieldName, FieldParams.valueMin, FieldParams.valueMax));
-                                break;
-                            case "drop":
-                                fieldCounter.incrementDropCounter();
-                                fields.add(new DoubleField(fieldName, FieldParams.dropMin, FieldParams.dropMax));
-                                break;
-                            case "variation":
-                                fieldCounter.incrementVariationCounter();
-                                fields.add(new DoubleField(fieldName, FieldParams.variationMin, FieldParams.variationMax));
-                                break;
-                            case "date":
-                                fieldCounter.incrementDateCounter();
-                                fields.add(new DateField(fieldName, FieldParams.datePossibleValues));
-                                break;
-                            default:
-                                break;
-                        }
+                if (fieldCounter.isAtSubscriptionLimit(fieldName, subscriptionsToGenerate, threadNum) || fieldCounter.getCounterOfField(fieldName) < targetCount &&
+                        ThreadLocalRandom.current().nextDouble() < frequency) {
+                    switch (fieldName) {
+                        case "company":
+                            fieldCounter.incrementCompanyCounter();
+                            fields.add(new StringField(fieldName, FieldParams.companyPossibleValues));
+                            break;
+                        case "value":
+                            fieldCounter.incrementValueCounter();
+                            fields.add(new DoubleField(fieldName, FieldParams.valueMin, FieldParams.valueMax));
+                            break;
+                        case "drop":
+                            fieldCounter.incrementDropCounter();
+                            fields.add(new DoubleField(fieldName, FieldParams.dropMin, FieldParams.dropMax));
+                            break;
+                        case "variation":
+                            fieldCounter.incrementVariationCounter();
+                            fields.add(new DoubleField(fieldName, FieldParams.variationMin, FieldParams.variationMax));
+                            break;
+                        case "date":
+                            fieldCounter.incrementDateCounter();
+                            fields.add(new DateField(fieldName, FieldParams.datePossibleValues));
+                            break;
+                        default:
+                            break;
                     }
                 }
-
-                Subscription subscription = new Subscription(fields);
-                subscription.generate();
-                validSubscription = true;
-                subscriptions.add(subscription);
-                fieldCounter.incrementTotalSubscriptionCounter();
             }
+
+            Subscription subscription = new Subscription(fields);
+            subscription.generate();
+            subscriptions.add(subscription);
+            fieldCounter.incrementTotalSubscriptionCounter();
         }
 
         return subscriptions;
