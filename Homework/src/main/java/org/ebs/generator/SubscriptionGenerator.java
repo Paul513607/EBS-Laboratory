@@ -19,24 +19,33 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
     private int numberOfSubscriptions;
     private int numberOfThreads;
 
+    private int threadNum;
+
     private List<Subscription> subscriptions;
 
     private FileManager fileManager;
 
     private final int MAX_ATTEMPTS = 3;
 
-    public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads, FileManager fileManager) {
+    public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads, int threadNum, FileManager fileManager) {
         this.numberOfSubscriptions = numberOfSubscriptions;
         this.numberOfThreads = numberOfThreads;
 
         this.fileManager = fileManager;
+
+        this.threadNum = threadNum;
 
         this.subscriptions = new ArrayList<>();
     }
 
     @Override
     public List<Subscription> call() {
-        for (int i = 0; i < numberOfSubscriptions / numberOfThreads;) {
+        int subscriptionsToGenerate = numberOfSubscriptions / numberOfThreads;
+        if (threadNum == numberOfThreads) {
+            subscriptionsToGenerate = subscriptionsToGenerate + (numberOfSubscriptions - numberOfThreads * subscriptionsToGenerate);
+        }
+
+        for (int i = 0; i < subscriptionsToGenerate; i++) {
             List<Field<?>> fields = new ArrayList<>();
             int attempts = 0;
             boolean validSubscription = false;
