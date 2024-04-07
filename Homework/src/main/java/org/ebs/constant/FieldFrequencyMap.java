@@ -1,5 +1,6 @@
 package org.ebs.constant;
 
+import org.ebs.Main;
 import org.ebs.generator.SubscriptionFieldCounter;
 
 import java.util.HashMap;

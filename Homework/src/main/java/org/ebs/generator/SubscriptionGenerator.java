@@ -7,13 +7,17 @@ import org.ebs.field.DoubleField;
 import org.ebs.field.Field;
 import org.ebs.field.StringField;
 import org.ebs.file.FileManager;
+import org.ebs.util.FieldCounter;
 import org.ebs.util.FieldParams;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class SubscriptionGenerator implements Callable<List<Subscription>> {
     private int numberOfSubscriptions;
@@ -24,25 +28,26 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
     private List<Subscription> subscriptions;
 
     private FileManager fileManager;
+    private FieldCounter fieldCounter;
 
     private final int MAX_ATTEMPTS = 3;
 
     public SubscriptionGenerator(int numberOfSubscriptions, int numberOfThreads, int threadNum, FileManager fileManager) {
         this.numberOfSubscriptions = numberOfSubscriptions;
         this.numberOfThreads = numberOfThreads;
+        this.threadNum = threadNum;
 
         this.fileManager = fileManager;
 
-        this.threadNum = threadNum;
-
         this.subscriptions = new ArrayList<>();
+        this.fieldCounter = new FieldCounter(threadNum);
     }
 
     @Override
     public List<Subscription> call() {
         int subscriptionsToGenerate = numberOfSubscriptions / numberOfThreads;
         if (threadNum == numberOfThreads) {
-            subscriptionsToGenerate = subscriptionsToGenerate + (numberOfSubscriptions - numberOfThreads * subscriptionsToGenerate);
+            subscriptionsToGenerate += numberOfSubscriptions - numberOfThreads * subscriptionsToGenerate;
         }
 
         for (int i = 0; i < subscriptionsToGenerate; i++) {
@@ -51,30 +56,30 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
             boolean validSubscription = false;
             while (!validSubscription && attempts < MAX_ATTEMPTS) {
                 for (String fieldName : FieldFrequencyMap.fieldFrequencyMap.keySet()) {
-                    int targetCount = FieldFrequencyMap.fieldTotalCountMap.get(fieldName);
+                    int targetCount = fieldCounter.getFieldTotalCountMapThread().get(fieldName);
                     double frequency = FieldFrequencyMap.getFieldFrequency(fieldName);
 
-                    if (SubscriptionFieldCounter.getCounterOfField(fieldName) < targetCount &&
-                            ThreadLocalRandom.current().nextDouble() < frequency || FieldFrequencyMap.isAtSubscriptionLimit(fieldName, numberOfSubscriptions)) {
+                    if (fieldCounter.isAtSubscriptionLimit(fieldName, subscriptionsToGenerate, threadNum) || fieldCounter.getCounterOfField(fieldName) < targetCount &&
+                            ThreadLocalRandom.current().nextDouble() < frequency) {
                         switch (fieldName) {
                             case "company":
-                                SubscriptionFieldCounter.incrementCompanyCounter();
+                                fieldCounter.incrementCompanyCounter();
                                 fields.add(new StringField(fieldName, FieldParams.companyPossibleValues));
                                 break;
                             case "value":
-                                SubscriptionFieldCounter.incrementValueCounter();
+                                fieldCounter.incrementValueCounter();
                                 fields.add(new DoubleField(fieldName, FieldParams.valueMin, FieldParams.valueMax));
                                 break;
                             case "drop":
-                                SubscriptionFieldCounter.incrementDropCounter();
+                                fieldCounter.incrementDropCounter();
                                 fields.add(new DoubleField(fieldName, FieldParams.dropMin, FieldParams.dropMax));
                                 break;
                             case "variation":
-                                SubscriptionFieldCounter.incrementVariationCounter();
+                                fieldCounter.incrementVariationCounter();
                                 fields.add(new DoubleField(fieldName, FieldParams.variationMin, FieldParams.variationMax));
                                 break;
                             case "date":
-                                SubscriptionFieldCounter.incrementDateCounter();
+                                fieldCounter.incrementDateCounter();
                                 fields.add(new DateField(fieldName, FieldParams.datePossibleValues));
                                 break;
                             default:
@@ -85,19 +90,9 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
 
                 Subscription subscription = new Subscription(fields);
                 subscription.generate();
-                validSubscription = subscription.getFields().size() > 0;
-                if (validSubscription) {
-                    subscriptions.add(subscription);
-                    SubscriptionFieldCounter.incrementTotalSubscriptionCounter();
-                    i++;
-                    break;
-                } else {
-                    attempts++;
-                }
-
-                if (attempts == 3) {
-                    i++;
-                }
+                validSubscription = true;
+                subscriptions.add(subscription);
+                fieldCounter.incrementTotalSubscriptionCounter();
             }
         }
 
