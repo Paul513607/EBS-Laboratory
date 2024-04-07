@@ -150,7 +150,7 @@ Configuration:
   "variationOperatorFrequency": 0.5,
   "dateOperatorFrequency": 0.5,
 
-  "numberOfThreads": 20,
+  "numberOfThreads": 10,
   "numberOfPublications": 10,
   "numberOfSubscriptions": 10
 }
