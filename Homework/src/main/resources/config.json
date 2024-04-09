@@ -8,11 +8,11 @@
   "variationMax": 1.0,
   "datePossibleValues": ["2024-04-06", "2024-04-07", "2024-04-08"],
 
-  "companyFrequency": 1,
-  "valueFrequency": 1,
-  "dropFrequency": 1,
-  "variationFrequency": 1,
-  "dateFrequency": 1,
+  "companyFrequency": 0.7,
+  "valueFrequency": 0.5,
+  "dropFrequency": 0.3,
+  "variationFrequency": 0.2,
+  "dateFrequency": 0.5,
 
   "companyOperatorFrequency": 0.5,
   "valueOperatorFrequency": 0.5,
@@ -20,7 +20,7 @@
   "variationOperatorFrequency": 0.5,
   "dateOperatorFrequency": 0.5,
 
- "numberOfThreads": 20,
-  "numberOfPublications": 10,
-  "numberOfSubscriptions": 10
+  "numberOfThreads": 1,
+  "numberOfPublications": 1000,
+  "numberOfSubscriptions": 1000
 }

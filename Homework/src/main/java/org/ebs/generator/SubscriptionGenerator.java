@@ -11,10 +11,7 @@ import org.ebs.util.FieldCounter;
 import org.ebs.util.FieldParams;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -89,6 +86,52 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
             fieldCounter.incrementTotalSubscriptionCounter();
         }
 
+        subscriptions = splitSubscriptions(subscriptions);
+        Collections.shuffle(subscriptions);
         return subscriptions;
+    }
+
+    private List<Subscription> splitSubscriptions(List<Subscription> subscriptions) {
+        if (!hasEmptyPublications(subscriptions)) {
+            return subscriptions;
+        }
+
+        subscriptions.sort(Comparator.comparingInt(s -> s.getFields().size()));
+        Collections.reverse(subscriptions);
+        int countOfEmptySubscriptions = (int) subscriptions.stream().filter(this::isEmpty).count();
+        List<Subscription> splitSubscriptions = new ArrayList<>(subscriptions
+                .subList(countOfEmptySubscriptions, subscriptions.size() - countOfEmptySubscriptions));
+        for (int i = 0; i < countOfEmptySubscriptions; i++) {
+            Subscription subscription = subscriptions.get(i);
+            splitSubscriptions.addAll(splitSubscription(subscription));
+        }
+
+        return splitSubscriptions;
+    }
+
+    private List<Subscription> splitSubscription(Subscription subscription) {
+        Subscription firstSubscription, secondSubscription;
+        List<Field<?>> fields = subscription.getFields();
+        List<String> fieldOperators = subscription.getFieldOperators();
+        int randomIndex = ThreadLocalRandom.current().nextInt(1, fields.size() - 1);
+        firstSubscription = new Subscription(fields.subList(0, randomIndex + 1));
+        firstSubscription.setFieldOperators(fieldOperators.subList(0, randomIndex + 1));
+        secondSubscription = new Subscription(fields.subList(randomIndex + 1, fields.size()));
+        secondSubscription.setFieldOperators(fieldOperators.subList(randomIndex + 1, fields.size()));
+
+        return List.of(firstSubscription, secondSubscription);
+    }
+
+    private boolean hasEmptyPublications(List<Subscription> subscriptions) {
+        for (Subscription subscription : subscriptions) {
+            if (isEmpty(subscription)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isEmpty(Subscription subscription) {
+        return subscription.getFields().isEmpty();
     }
 }
