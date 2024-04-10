@@ -113,7 +113,7 @@ public class SubscriptionGenerator implements Callable<List<Subscription>> {
         Subscription firstSubscription, secondSubscription;
         List<Field<?>> fields = subscription.getFields();
         List<String> fieldOperators = subscription.getFieldOperators();
-        int randomIndex = ThreadLocalRandom.current().nextInt(1, fields.size() - 1);
+        int randomIndex = ThreadLocalRandom.current().nextInt(0, fields.size() - 1);
         firstSubscription = new Subscription(fields.subList(0, randomIndex + 1));
         firstSubscription.setFieldOperators(fieldOperators.subList(0, randomIndex + 1));
         secondSubscription = new Subscription(fields.subList(randomIndex + 1, fields.size()));
